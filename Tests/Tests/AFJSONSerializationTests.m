@@ -142,7 +142,7 @@ static NSData * AFJSONTestData() {
 - (void)testThatJSONResponseSerializerReturnsDictionaryForValidJSONDictionary {
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:self.baseURL statusCode:200 HTTPVersion:@"1.1" headerFields:@{@"Content-Type": @"text/json"}];
     NSError *error = nil;
-    id responseObject = [self.responseSerializer responseObjectForResponse:response data:AFJSONTestData() error:&error];
+    id responseObject = [self.responseSerializer responseObjectForResponse:response data:AFJSONTestData()  task:nil error:&error];
 
     XCTAssertNil(error, @"Serialization error should be nil");
     XCTAssert([responseObject isKindOfClass:[NSDictionary class]], @"Expected response to be a NSDictionary");
@@ -151,7 +151,7 @@ static NSData * AFJSONTestData() {
 - (void)testThatJSONResponseSerializerReturnsErrorForInvalidJSON {
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:self.baseURL statusCode:200 HTTPVersion:@"1.1" headerFields:@{@"Content-Type":@"text/json"}];
     NSError *error = nil;
-    [self.responseSerializer responseObjectForResponse:response data:[@"{invalid}" dataUsingEncoding:NSUTF8StringEncoding] error:&error];
+    [self.responseSerializer responseObjectForResponse:response data:[@"{invalid}" dataUsingEncoding:NSUTF8StringEncoding] task:nil error:&error];
 
     XCTAssertNotNil(error, @"Serialization error should not be nil");
 }
@@ -160,7 +160,7 @@ static NSData * AFJSONTestData() {
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:self.baseURL statusCode:200 HTTPVersion:@"1.1" headerFields:@{@"Content-Type":@"text/json"}];
     NSData *data = [NSData data];
     NSError *error = nil;
-    id responseObject = [self.responseSerializer responseObjectForResponse:response data:data error:&error];
+    id responseObject = [self.responseSerializer responseObjectForResponse:response data:data task:nil error:&error];
     XCTAssertNil(responseObject);
     XCTAssertNil(error);
 }
@@ -169,7 +169,7 @@ static NSData * AFJSONTestData() {
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:self.baseURL statusCode:200 HTTPVersion:@"1.1" headerFields:@{@"Content-Type":@"text/json"}];
     NSData *data = [@" " dataUsingEncoding:NSUTF8StringEncoding];
     NSError *error = nil;
-    id responseObject = [self.responseSerializer responseObjectForResponse:response data:data error:&error];
+    id responseObject = [self.responseSerializer responseObjectForResponse:response data:data task:nil error:&error];
     XCTAssertNil(responseObject);
     XCTAssertNil(error);
 }
@@ -184,7 +184,7 @@ static NSData * AFJSONTestData() {
     NSError *error = nil;
     NSDictionary *responseObject = [self.responseSerializer responseObjectForResponse:response
                                                                                  data:data
-                                                                                error:&error];
+                                                      task:nil                       error:&error];
     XCTAssertNil(error);
     XCTAssertNotNil(responseObject[@"key"]);
     XCTAssertNil(responseObject[@"nullkey"]);

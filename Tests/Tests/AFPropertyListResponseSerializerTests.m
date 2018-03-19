@@ -41,7 +41,7 @@
     
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:self.baseURL statusCode:200 HTTPVersion:@"1.1" headerFields:@{@"Content-Type": @"application/x-plist"}];
     NSError *error = nil;
-    id responseObject = [self.responseSerializer responseObjectForResponse:response data:data error:&error];
+    id responseObject = [self.responseSerializer responseObjectForResponse:response data:data task:nil error:&error];
     
     XCTAssertTrue([responseObject isKindOfClass:[NSDictionary class]], @"Expected valid dictionary.");
 }
@@ -51,7 +51,7 @@
     
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:self.baseURL statusCode:200 HTTPVersion:@"1.1" headerFields:@{@"Content-Type": @"application/x-plist"}];
     NSError *error = nil;
-    id responseObject = [self.responseSerializer responseObjectForResponse:response data:data error:&error];
+    id responseObject = [self.responseSerializer responseObjectForResponse:response data:data task:nil error:&error];
     
     XCTAssertNil(responseObject, @"Expected nil responseObject.");
     XCTAssertNotNil(error, @"Expected non-nil error.");
@@ -60,7 +60,7 @@
 - (void)testThatPropertyListResponseSerializerHandles204 {
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:self.baseURL statusCode:204 HTTPVersion:@"1.1" headerFields:@{@"Content-Type": @"application/x-plist"}];
     NSError *error;
-    id responseObject = [self.responseSerializer responseObjectForResponse:response data:nil error:&error];
+    id responseObject = [self.responseSerializer responseObjectForResponse:response data:nil task:nil error:&error];
 
     XCTAssertNil(responseObject, @"Response should be nil when handling 204 with application/x-plist");
     XCTAssertNil(error, @"Error handling application/x-plist");

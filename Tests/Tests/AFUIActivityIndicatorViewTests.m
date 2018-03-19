@@ -51,7 +51,7 @@
                                   dataTaskWithRequest:self.request
                                   uploadProgress:nil
                                   downloadProgress:nil
-                                  completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
+                                  completionHandler:^(NSURLSessionTask *dataTask,NSURLResponse *response, id responseObject, NSError *error) {
                                       [expectation fulfill];
                                   }];
     
@@ -71,7 +71,7 @@
                                   dataTaskWithRequest:self.request
                                   uploadProgress:nil
                                   downloadProgress:nil
-                                  completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
+                                  completionHandler:^(NSURLSessionTask *dataTask,NSURLResponse *response, id responseObject, NSError *error) {
                                       //Without the dispatch after, this test would PASS errorenously because the test
                                       //would finish before the notification was posted to all objects that were
                                       //observing it.
@@ -95,7 +95,7 @@
                                   dataTaskWithRequest:self.request
                                   uploadProgress:nil
                                   downloadProgress:nil
-                                  completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
+                                  completionHandler:^(NSURLSessionTask *dataTask,NSURLResponse *response, id responseObject, NSError *error) {
                                       //Without the dispatch after, this test would PASS errorenously because the test
                                       //would finish before the notification was posted to all objects that were
                                       //observing it.

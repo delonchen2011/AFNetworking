@@ -42,6 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable id)responseObjectForResponse:(nullable NSURLResponse *)response
                            data:(nullable NSData *)data
+                           task:(nullable NSURLSessionTask *)task
                           error:(NSError * _Nullable __autoreleasing *)error NS_SWIFT_NOTHROW;
 
 @end
@@ -306,5 +307,7 @@ FOUNDATION_EXPORT NSString * const AFURLResponseSerializationErrorDomain;
 FOUNDATION_EXPORT NSString * const AFNetworkingOperationFailingURLResponseErrorKey;
 
 FOUNDATION_EXPORT NSString * const AFNetworkingOperationFailingURLResponseDataErrorKey;
+
+BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger code, NSString *domain);
 
 NS_ASSUME_NONNULL_END

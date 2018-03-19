@@ -106,7 +106,7 @@ typedef void (^AFURLSessionDownloadTaskDidWriteDataBlock)(NSURLSession *session,
 typedef void (^AFURLSessionDownloadTaskDidResumeBlock)(NSURLSession *session, NSURLSessionDownloadTask *downloadTask, int64_t fileOffset, int64_t expectedTotalBytes);
 typedef void (^AFURLSessionTaskProgressBlock)(NSProgress *);
 
-typedef void (^AFURLSessionTaskCompletionHandler)(NSURLResponse *response, id responseObject, NSError *error);
+typedef void (^AFURLSessionTaskCompletionHandler)(NSURLSessionTask *dataTask, NSURLResponse *response, id responseObject, NSError *error);
 
 
 #pragma mark -
@@ -158,7 +158,6 @@ typedef void (^AFURLSessionTaskCompletionHandler)(NSURLResponse *response, id re
                 [weakTask resume];
             };
         }
-        
         [progress addObserver:self
                    forKeyPath:NSStringFromSelector(@selector(fractionCompleted))
                       options:NSKeyValueObservingOptionNew
@@ -219,7 +218,7 @@ didCompleteWithError:(NSError *)error
 
         dispatch_group_async(manager.completionGroup ?: url_session_manager_completion_group(), manager.completionQueue ?: dispatch_get_main_queue(), ^{
             if (self.completionHandler) {
-                self.completionHandler(task.response, responseObject, error);
+                self.completionHandler(task,task.response, responseObject, error);
             }
 
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -229,7 +228,7 @@ didCompleteWithError:(NSError *)error
     } else {
         dispatch_async(url_session_manager_processing_queue(), ^{
             NSError *serializationError = nil;
-            responseObject = [manager.responseSerializer responseObjectForResponse:task.response data:data error:&serializationError];
+            responseObject = [manager.responseSerializer responseObjectForResponse:task.response data:data task:task error:&serializationError];
 
             if (self.downloadFileURL) {
                 responseObject = self.downloadFileURL;
@@ -245,7 +244,7 @@ didCompleteWithError:(NSError *)error
 
             dispatch_group_async(manager.completionGroup ?: url_session_manager_completion_group(), manager.completionQueue ?: dispatch_get_main_queue(), ^{
                 if (self.completionHandler) {
-                    self.completionHandler(task.response, responseObject, serializationError);
+                    self.completionHandler(task,task.response, responseObject, serializationError);
                 }
 
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -582,7 +581,7 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 - (void)addDelegateForDataTask:(NSURLSessionDataTask *)dataTask
                 uploadProgress:(nullable void (^)(NSProgress *uploadProgress)) uploadProgressBlock
               downloadProgress:(nullable void (^)(NSProgress *downloadProgress)) downloadProgressBlock
-             completionHandler:(void (^)(NSURLResponse *response, id responseObject, NSError *error))completionHandler
+             completionHandler:(void (^)(NSURLSessionTask *dataTask, NSURLResponse *response, id responseObject, NSError *error))completionHandler
 {
     AFURLSessionManagerTaskDelegate *delegate = [[AFURLSessionManagerTaskDelegate alloc] initWithTask:dataTask];
     delegate.manager = self;
@@ -597,7 +596,7 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 
 - (void)addDelegateForUploadTask:(NSURLSessionUploadTask *)uploadTask
                         progress:(void (^)(NSProgress *uploadProgress)) uploadProgressBlock
-               completionHandler:(void (^)(NSURLResponse *response, id responseObject, NSError *error))completionHandler
+               completionHandler:(void (^)(NSURLSessionTask *dataTask, NSURLResponse *response, id responseObject, NSError *error))completionHandler
 {
     AFURLSessionManagerTaskDelegate *delegate = [[AFURLSessionManagerTaskDelegate alloc] initWithTask:uploadTask];
     delegate.manager = self;
@@ -613,7 +612,7 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 - (void)addDelegateForDownloadTask:(NSURLSessionDownloadTask *)downloadTask
                           progress:(void (^)(NSProgress *downloadProgress)) downloadProgressBlock
                        destination:(NSURL * (^)(NSURL *targetPath, NSURLResponse *response))destination
-                 completionHandler:(void (^)(NSURLResponse *response, NSURL *filePath, NSError *error))completionHandler
+                 completionHandler:(void (^)(NSURLSessionTask *dataTask, NSURLResponse *response, NSURL *filePath, NSError *error))completionHandler
 {
     AFURLSessionManagerTaskDelegate *delegate = [[AFURLSessionManagerTaskDelegate alloc] initWithTask:downloadTask];
     delegate.manager = self;
@@ -713,7 +712,7 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 #pragma mark -
 
 - (NSURLSessionDataTask *)dataTaskWithRequest:(NSURLRequest *)request
-                            completionHandler:(void (^)(NSURLResponse *response, id responseObject, NSError *error))completionHandler
+                            completionHandler:(void (^)(NSURLSessionTask *dataTask, NSURLResponse *response, id responseObject, NSError *error))completionHandler
 {
     return [self dataTaskWithRequest:request uploadProgress:nil downloadProgress:nil completionHandler:completionHandler];
 }
@@ -721,7 +720,7 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 - (NSURLSessionDataTask *)dataTaskWithRequest:(NSURLRequest *)request
                                uploadProgress:(nullable void (^)(NSProgress *uploadProgress)) uploadProgressBlock
                              downloadProgress:(nullable void (^)(NSProgress *downloadProgress)) downloadProgressBlock
-                            completionHandler:(nullable void (^)(NSURLResponse *response, id _Nullable responseObject,  NSError * _Nullable error))completionHandler {
+                            completionHandler:(nullable void (^)(NSURLSessionTask *dataTask, NSURLResponse *response, id _Nullable responseObject,  NSError * _Nullable error))completionHandler {
 
     __block NSURLSessionDataTask *dataTask = nil;
     url_session_manager_create_task_safely(^{
@@ -738,7 +737,7 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 - (NSURLSessionUploadTask *)uploadTaskWithRequest:(NSURLRequest *)request
                                          fromFile:(NSURL *)fileURL
                                          progress:(void (^)(NSProgress *uploadProgress)) uploadProgressBlock
-                                completionHandler:(void (^)(NSURLResponse *response, id responseObject, NSError *error))completionHandler
+                                completionHandler:(void (^)(NSURLSessionTask *dataTask, NSURLResponse *response, id responseObject, NSError *error))completionHandler
 {
     __block NSURLSessionUploadTask *uploadTask = nil;
     url_session_manager_create_task_safely(^{
@@ -764,7 +763,7 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 - (NSURLSessionUploadTask *)uploadTaskWithRequest:(NSURLRequest *)request
                                          fromData:(NSData *)bodyData
                                          progress:(void (^)(NSProgress *uploadProgress)) uploadProgressBlock
-                                completionHandler:(void (^)(NSURLResponse *response, id responseObject, NSError *error))completionHandler
+                                completionHandler:(void (^)(NSURLSessionTask *dataTask, NSURLResponse *response, id responseObject, NSError *error))completionHandler
 {
     __block NSURLSessionUploadTask *uploadTask = nil;
     url_session_manager_create_task_safely(^{
@@ -778,7 +777,7 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 
 - (NSURLSessionUploadTask *)uploadTaskWithStreamedRequest:(NSURLRequest *)request
                                                  progress:(void (^)(NSProgress *uploadProgress)) uploadProgressBlock
-                                        completionHandler:(void (^)(NSURLResponse *response, id responseObject, NSError *error))completionHandler
+                                        completionHandler:(void (^)(NSURLSessionTask *dataTask, NSURLResponse *response, id responseObject, NSError *error))completionHandler
 {
     __block NSURLSessionUploadTask *uploadTask = nil;
     url_session_manager_create_task_safely(^{
@@ -795,7 +794,7 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 - (NSURLSessionDownloadTask *)downloadTaskWithRequest:(NSURLRequest *)request
                                              progress:(void (^)(NSProgress *downloadProgress)) downloadProgressBlock
                                           destination:(NSURL * (^)(NSURL *targetPath, NSURLResponse *response))destination
-                                    completionHandler:(void (^)(NSURLResponse *response, NSURL *filePath, NSError *error))completionHandler
+                                    completionHandler:(void (^)(NSURLSessionTask *dataTask, NSURLResponse *response, NSURL *filePath, NSError *error))completionHandler
 {
     __block NSURLSessionDownloadTask *downloadTask = nil;
     url_session_manager_create_task_safely(^{
@@ -810,7 +809,7 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 - (NSURLSessionDownloadTask *)downloadTaskWithResumeData:(NSData *)resumeData
                                                 progress:(void (^)(NSProgress *downloadProgress)) downloadProgressBlock
                                              destination:(NSURL * (^)(NSURL *targetPath, NSURLResponse *response))destination
-                                       completionHandler:(void (^)(NSURLResponse *response, NSURL *filePath, NSError *error))completionHandler
+                                       completionHandler:(void (^)(NSURLSessionTask *dataTask, NSURLResponse *response, NSURL *filePath, NSError *error))completionHandler
 {
     __block NSURLSessionDownloadTask *downloadTask = nil;
     url_session_manager_create_task_safely(^{

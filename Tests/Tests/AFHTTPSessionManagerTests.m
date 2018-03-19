@@ -55,7 +55,7 @@
 
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"/get" relativeToURL:self.baseURL]];
     NSURLSessionDataTask *task = [self.manager dataTaskWithRequest:request uploadProgress:nil downloadProgress:nil
-                                                 completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
+                                                 completionHandler:^(NSURLSessionTask *dataTask,NSURLResponse *response, id responseObject, NSError *error) {
         blockResponseObject = responseObject;
         blockError = error;
         [expectation fulfill];
@@ -77,7 +77,7 @@
 
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"/status/404" relativeToURL:self.baseURL]];
     NSURLSessionDataTask *task = [self.manager dataTaskWithRequest:request uploadProgress:nil downloadProgress:nil
-                                                 completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
+                                                 completionHandler:^(NSURLSessionTask *dataTask,NSURLResponse *response, id responseObject, NSError *error) {
         blockError = error;
         [expectation fulfill];
     }];
@@ -98,7 +98,7 @@
 
     NSURLRequest *redirectRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:@"/redirect/1" relativeToURL:self.baseURL]];
     NSURLSessionDataTask *redirectTask = [self.manager dataTaskWithRequest:redirectRequest uploadProgress:nil downloadProgress:nil
-                                                         completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
+                                                         completionHandler:^(NSURLSessionTask *dataTask,NSURLResponse *response, id responseObject, NSError *error) {
         blockError = error;
         [expectation fulfill];
     }];
@@ -137,7 +137,7 @@
                     downloadTaskWithRequest:[NSURLRequest requestWithURL:self.baseURL]
                     progress:nil
                     destination:nil
-                    completionHandler:^(NSURLResponse *response, NSURL *filePath, NSError *error) {
+                    completionHandler:^(NSURLSessionTask *dataTask,NSURLResponse *response, NSURL *filePath, NSError *error) {
                         downloadFilePath = filePath;
                         completionBlockExecuted = YES;
                         [expectation fulfill];
@@ -162,7 +162,7 @@
                                                                            NSURL *dirURL  = [[[NSFileManager defaultManager] URLsForDirectory:NSLibraryDirectory inDomains:NSUserDomainMask] lastObject];
                                                                            return [dirURL URLByAppendingPathComponent:@"t1.file"];
                                                                        }
-                                                                 completionHandler:^(NSURLResponse *response, NSURL *filePath, NSError *error) {
+                                                                 completionHandler:^(NSURLSessionTask *dataTask,NSURLResponse *response, NSURL *filePath, NSError *error) {
                                                                      downloadFilePath = filePath;
                                                                      completionBlockExecuted = YES;
                                                                      [expectation fulfill];

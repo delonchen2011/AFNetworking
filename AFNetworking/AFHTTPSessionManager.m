@@ -211,7 +211,7 @@
         return nil;
     }
 
-    __block NSURLSessionDataTask *task = [self uploadTaskWithStreamedRequest:request progress:uploadProgress completionHandler:^(NSURLResponse * __unused response, id responseObject, NSError *error) {
+    __block NSURLSessionDataTask *task = [self uploadTaskWithStreamedRequest:request progress:uploadProgress completionHandler:^(NSURLSessionTask *dataTask, NSURLResponse * __unused response, id responseObject, NSError *error) {
         if (error) {
             if (failure) {
                 failure(task, error);
@@ -288,14 +288,14 @@
     dataTask = [self dataTaskWithRequest:request
                           uploadProgress:uploadProgress
                         downloadProgress:downloadProgress
-                       completionHandler:^(NSURLResponse * __unused response, id responseObject, NSError *error) {
+                       completionHandler:^(NSURLSessionTask *dataTask_, NSURLResponse * __unused response, id responseObject, NSError *error) {
         if (error) {
             if (failure) {
-                failure(dataTask, error);
+                failure((NSURLSessionDataTask *)dataTask, error);
             }
         } else {
             if (success) {
-                success(dataTask, responseObject);
+                success((NSURLSessionDataTask *)dataTask, responseObject);
             }
         }
     }];

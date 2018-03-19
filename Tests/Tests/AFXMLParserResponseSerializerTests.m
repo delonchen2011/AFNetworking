@@ -70,7 +70,7 @@ static NSData * AFXMLTestData() {
 - (void)testThatXMLParserResponseSerializerReturnsNSXMLParserObjectForValidXML {
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:self.baseURL statusCode:200 HTTPVersion:@"1.1" headerFields:@{@"Content-Type": @"application/xml"}];
     NSError *error = nil;
-    id responseObject = [self.responseSerializer responseObjectForResponse:response data:AFXMLTestData() error:&error];
+    id responseObject = [self.responseSerializer responseObjectForResponse:response data:AFXMLTestData() task:nil error:&error];
 
     XCTAssertNil(error, @"Serialization error should be nil");
     XCTAssert([responseObject isKindOfClass:[NSXMLParser class]], @"Expected response to be a NSXMLParser");

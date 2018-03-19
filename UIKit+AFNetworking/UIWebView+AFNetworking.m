@@ -124,7 +124,7 @@
                 dataTaskWithRequest:request
                 uploadProgress:nil
                 downloadProgress:nil
-                completionHandler:^(NSURLResponse * _Nonnull response, id  _Nonnull responseObject, NSError * _Nullable error) {
+                completionHandler:^(NSURLSessionTask *dataTask_,NSURLResponse * _Nonnull response, id  _Nonnull responseObject, NSError * _Nullable error) {
                     __strong __typeof(weakSelf) strongSelf = weakSelf;
                     if (error) {
                         if (failure) {

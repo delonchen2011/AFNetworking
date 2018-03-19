@@ -50,7 +50,7 @@ static NSError * AFErrorWithUnderlyingError(NSError *error, NSError *underlyingE
     return [[NSError alloc] initWithDomain:error.domain code:error.code userInfo:mutableUserInfo];
 }
 
-static BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger code, NSString *domain) {
+BOOL AFErrorOrUnderlyingErrorHasCodeInDomain(NSError *error, NSInteger code, NSString *domain) {
     if ([error.domain isEqualToString:domain] && error.code == code) {
         return YES;
     } else if (error.userInfo[NSUnderlyingErrorKey]) {
@@ -160,6 +160,7 @@ static id AFJSONObjectByRemovingKeysWithNullValues(id JSONObject, NSJSONReadingO
 
 - (id)responseObjectForResponse:(NSURLResponse *)response
                            data:(NSData *)data
+                           task:(nullable NSURLSessionTask *)task
                           error:(NSError *__autoreleasing *)error
 {
     [self validateResponse:(NSHTTPURLResponse *)response data:data error:error];
@@ -232,6 +233,7 @@ static id AFJSONObjectByRemovingKeysWithNullValues(id JSONObject, NSJSONReadingO
 
 - (id)responseObjectForResponse:(NSURLResponse *)response
                            data:(NSData *)data
+                           task:(nullable NSURLSessionTask *)task
                           error:(NSError *__autoreleasing *)error
 {
     if (![self validateResponse:(NSHTTPURLResponse *)response data:data error:error]) {
@@ -325,6 +327,7 @@ static id AFJSONObjectByRemovingKeysWithNullValues(id JSONObject, NSJSONReadingO
 
 - (id)responseObjectForResponse:(NSHTTPURLResponse *)response
                            data:(NSData *)data
+                           task:(nullable NSURLSessionTask *)task
                           error:(NSError *__autoreleasing *)error
 {
     if (![self validateResponse:(NSHTTPURLResponse *)response data:data error:error]) {
@@ -370,6 +373,7 @@ static id AFJSONObjectByRemovingKeysWithNullValues(id JSONObject, NSJSONReadingO
 
 - (id)responseObjectForResponse:(NSURLResponse *)response
                            data:(NSData *)data
+                           task:(nullable NSURLSessionTask *)task
                           error:(NSError *__autoreleasing *)error
 {
     if (![self validateResponse:(NSHTTPURLResponse *)response data:data error:error]) {
@@ -457,6 +461,7 @@ static id AFJSONObjectByRemovingKeysWithNullValues(id JSONObject, NSJSONReadingO
 
 - (id)responseObjectForResponse:(NSURLResponse *)response
                            data:(NSData *)data
+                           task:(nullable NSURLSessionTask *)task
                           error:(NSError *__autoreleasing *)error
 {
     if (![self validateResponse:(NSHTTPURLResponse *)response data:data error:error]) {
@@ -674,6 +679,7 @@ static UIImage * AFInflatedImageFromResponseWithDataAtScale(NSHTTPURLResponse *r
 
 - (id)responseObjectForResponse:(NSURLResponse *)response
                            data:(NSData *)data
+                           task:(nullable NSURLSessionTask *)task
                           error:(NSError *__autoreleasing *)error
 {
     if (![self validateResponse:(NSHTTPURLResponse *)response data:data error:error]) {
@@ -765,6 +771,7 @@ static UIImage * AFInflatedImageFromResponseWithDataAtScale(NSHTTPURLResponse *r
 
 - (id)responseObjectForResponse:(NSURLResponse *)response
                            data:(NSData *)data
+                           task:(nullable NSURLSessionTask *)task
                           error:(NSError *__autoreleasing *)error
 {
     for (id <AFURLResponseSerialization> serializer in self.responseSerializers) {
@@ -773,7 +780,7 @@ static UIImage * AFInflatedImageFromResponseWithDataAtScale(NSHTTPURLResponse *r
         }
 
         NSError *serializerError = nil;
-        id responseObject = [serializer responseObjectForResponse:response data:data error:&serializerError];
+        id responseObject = [serializer responseObjectForResponse:response data:data task:task error:&serializerError];
         if (responseObject) {
             if (error) {
                 *error = AFErrorWithUnderlyingError(serializerError, *error);
@@ -783,7 +790,7 @@ static UIImage * AFInflatedImageFromResponseWithDataAtScale(NSHTTPURLResponse *r
         }
     }
 
-    return [super responseObjectForResponse:response data:data error:error];
+    return [super responseObjectForResponse:response data:data task:task error:error];
 }
 
 #pragma mark - NSSecureCoding

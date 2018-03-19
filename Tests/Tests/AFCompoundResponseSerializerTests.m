@@ -54,7 +54,7 @@
                                                         headerFields:@{@"Content-Type":@"application/json"}];
 
     NSError *error = nil;
-    id responseObject = [compoundSerializer responseObjectForResponse:response data:data error:&error];
+    id responseObject = [compoundSerializer responseObjectForResponse:response data:data task:nil error:&error];
 
     XCTAssertTrue([responseObject isKindOfClass:[NSDictionary class]]);
     XCTAssertNil(error);
